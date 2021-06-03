@@ -222,14 +222,37 @@ h2 a {
         $("#chart1").shieldChart({
             exportOptions: {
                 image: false,
-                print: false
+                print: true
+            },
+            chartLegend: {
+                enabled: false
             },
             axisX: {
+                axisTickText: {
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    },
+                    textAngle: 320
+                },
+                title: {
+                    text: "Last 15 days details",
+                    align: 'middle',
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
+                },
                 categoricalValues: confirmedCaseHeader
             },
             axisY: {
                 title: {
-                    text: "Number Of Person Got Confirmed"
+                    text: "Number Of Person Got Confirmed",
+                    align: 'middle',
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
                 }
             },
             dataSeries: [{
@@ -241,14 +264,37 @@ h2 a {
     $("#chart2").shieldChart({
             exportOptions: {
                 image: false,
-                print: false
+                print: true
+            },
+            chartLegend: {
+                enabled: false
             },
             axisX: {
+                axisTickText: {
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    },
+                    textAngle: 320
+                },
+                title: {
+                    text: 'Last 15 days details',
+                    align: 'middle',
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
+                },
                 categoricalValues: recoveredCaseHeader
             },
             axisY: {
                 title: {
-                    text: "No Of Person Got Recovered"
+                    text: "No Of Person Got Recovered",
+                    align: 'middle',
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
                 }
             },
             dataSeries: [{
@@ -261,14 +307,37 @@ h2 a {
     $("#chart3").shieldChart({
             exportOptions: {
                 image: false,
-                print: false
+                print: true
+            },
+            chartLegend: {
+                enabled: false
             },
             axisX: {
+                axisTickText: {
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    },
+                    textAngle: 320
+                },
+                title: {
+                    text: "Last 15 days details",
+                    align: 'middle',
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
+                },
                 categoricalValues: deceasedCaseHeader
             },
             axisY: {
                 title: {
-                    text: "No Of Person Got Deceased"
+                    text: "No Of Person Got Deceased",
+                    align: 'middle',
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
                 }
             },
             dataSeries: [{
@@ -279,13 +348,6 @@ h2 a {
     });
 
     });
-
-
-
-
-
-
-
 
     </script>
 
@@ -397,7 +459,7 @@ h2 a {
             <div class="card-counter info">
                 <i class="fa fa-ticket"></i>
                 <span class="count-numbers"
-                      th:utext="${stateAllStatus.confirmedCase}-${stateAllStatus.recoveredCase}-${stateAllStatus.deceasedCase}"/>
+                      th:utext="${stateAllStatus.activeCase}"/>
                 <span class="count-name">Active</span>
             </div>
         </div>
