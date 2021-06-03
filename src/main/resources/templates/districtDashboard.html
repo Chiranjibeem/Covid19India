@@ -1,0 +1,247 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        /*
+	Side Navigation Menu V2, RWD
+	===================
+	License:
+	https://goo.gl/EaUPrt
+	===================
+	Author: @PableraShow
+
+ */
+
+@charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,700);
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.42em;
+  color:#A7A1AE;
+  background-color:#1F2739;
+}
+
+h1 {
+  font-size:3em;
+  font-weight: 300;
+  line-height:1em;
+  text-align: center;
+  color: #4DC3FA;
+}
+
+h2 {
+  font-size:1em;
+  font-weight: 300;
+  text-align: center;
+  display: block;
+  line-height:1em;
+  padding-bottom: 2em;
+  color: white;
+  font-weight: bold;
+}
+
+h2 a {
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #FB667A;
+  text-decoration: none;
+}
+
+.blue { color: #185875; }
+.yellow { color: #FFF842; }
+
+.container th h1 {
+	  font-weight: bold;
+	  font-size: 1em;
+  text-align: left;
+  color: white;
+}
+
+.container td {
+	  font-weight: normal;
+	  font-size: 1em;
+  -webkit-box-shadow: 0 2px 2px -2px #0E1119;
+	   -moz-box-shadow: 0 2px 2px -2px #0E1119;
+	        box-shadow: 0 2px 2px -2px #0E1119;
+}
+
+.container td, .container th {
+	  padding-bottom: 2%;
+	  padding-top: 2%;
+  padding-left:2%;
+}
+
+/* Background-color of the odd rows */
+.container tr:nth-child(odd) {
+	  background-color: #323C50;
+	  font-weight: bold;
+	  color:white;
+}
+
+/* Background-color of the even rows */
+.container tr:nth-child(even) {
+	  background-color: #2C3446;
+	   font-weight: bold;
+	  color:white;
+}
+
+.container th {
+	  background-color: #1F2739;
+}
+
+.container td:first-child { color: #FB667A; }
+
+.container tr:hover {
+   background-color: #464A52;
+-webkit-box-shadow: 0 6px 6px -6px #0E1119;
+	   -moz-box-shadow: 0 6px 6px -6px #0E1119;
+	        box-shadow: 0 6px 6px -6px #0E1119;
+}
+
+.container td:hover {
+  background-color: #FFF842;
+  color: #403E10;
+  font-weight: bold;
+
+  box-shadow: #7F7C21 -1px 1px, #7F7C21 -2px 2px, #7F7C21 -3px 3px, #7F7C21 -4px 4px, #7F7C21 -5px 5px, #7F7C21 -6px 6px;
+  transform: translate3d(6px, -6px, 0);
+
+  transition-delay: 0s;
+	  transition-duration: 0.4s;
+	  transition-property: all;
+  transition-timing-function: line;
+}
+
+@media (min-width:400px max-width: 800px) {
+.container td:nth-child(4),
+.container th:nth-child(4) { display: none; }
+}
+
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+$(document).ready(function(){
+    $('.search').on('keyup',function(){
+        var searchTerm = $(this).val().toLowerCase();
+        $('#userTbl tbody tr').each(function(){
+            var lineStr = $(this).text().toLowerCase();
+            if(lineStr.indexOf(searchTerm) === -1){
+                $(this).hide();
+            }else{
+                $(this).show();
+            }
+        });
+    });
+});
+
+
+    </script>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Site Metas -->
+    <title>Live Dinner Restaurant - Responsive HTML5 Template</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Site Icons -->
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Responsive CSS -->
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/custom.css">
+
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+
+<!-- Start header -->
+<header class="top-navbar">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="images/logo.png" alt=""/>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbars-rs-food"
+                    aria-controls="navbars-rs-food" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbars-rs-food">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="/districtDashboard">District Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/stateDashboard">State Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/countryDashboard">Country Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<!-- End header -->
+
+<div class="blog-box">
+    <div class="container">
+        <h2>Corona Status Update</h2>
+        <div class="form-group pull-center">
+            <br>
+            <input type="text" class="search form-control" placeholder="What you looking for?">
+        </div>
+
+        <table class="container" id="userTbl">
+            <thead>
+            <tr>
+                <td th:utext="Sno"/>
+                <td th:utext="State"/>
+                <td th:utext="District"/>
+                <td th:utext="Confirmed"/>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="status, s : ${statusList}">
+                <td th:utext="${s.index + 1}"/>
+                <td th:utext="${status.state}"/>
+                <td>
+                    <p th:each="dist, d : ${status.districtData}">
+                        <span th:utext="${dist.district}"></span>
+                    </p>
+                </td>
+                <td>
+                    <p th:each="dist, d : ${status.districtData}">
+                        <span th:utext="${dist.confirmed}"></span>
+                    </p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- ALL JS FILES -->
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<!-- ALL PLUGINS -->
+<script src="js/jquery.superslides.min.js"></script>
+<script src="js/images-loded.min.js"></script>
+<script src="js/isotope.min.js"></script>
+<script src="js/baguetteBox.min.js"></script>
+<script src="js/form-validator.min.js"></script>
+<script src="js/contact-form-script.js"></script>
+<script src="js/custom.js"></script>
+
+</body>
+</html>
