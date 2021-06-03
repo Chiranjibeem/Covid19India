@@ -179,9 +179,9 @@ public class Covid19Controller {
                 model.addAttribute("confirmedCaseData", dailyConfirmedCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
                 model.addAttribute("recoveredCaseData", dailyRecoveredCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
                 model.addAttribute("deceasedCaseData",  dailyDeceasedCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
-                model.addAttribute("confirmedCaseHeader", dailyConfirmedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 6).replaceAll("-"," ")).toArray());
-                model.addAttribute("recoveredCaseHeader", dailyRecoveredCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 6).replaceAll("-"," ")).toArray());
-                model.addAttribute("deceasedCaseHeader", dailyDeceasedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 6).replaceAll("-"," ")).toArray());
+                model.addAttribute("confirmedCaseHeader", dailyConfirmedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-","  ")).toArray());
+                model.addAttribute("recoveredCaseHeader", dailyRecoveredCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-","  ")).toArray());
+                model.addAttribute("deceasedCaseHeader", dailyDeceasedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-","  ")).toArray());
             }
 
             TrackUser trackUser = new TrackUser();

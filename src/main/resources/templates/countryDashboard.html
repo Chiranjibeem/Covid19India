@@ -246,6 +246,12 @@ h2 a {
                 categoricalValues: confirmedCaseHeader
             },
             axisY: {
+                axisTickText: {
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
+                },
                 title: {
                     text: "Number Of Person Got Confirmed",
                     align: 'middle',
@@ -258,7 +264,10 @@ h2 a {
             dataSeries: [{
                 seriesType: "bar",
                 data: confirmedCaseData
-            }]
+            }],
+             borderColor: 'blue',
+             borderWidth: 2,
+             borderRadius: 2
     });
 
     $("#chart2").shieldChart({
@@ -288,6 +297,12 @@ h2 a {
                 categoricalValues: recoveredCaseHeader
             },
             axisY: {
+                axisTickText: {
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
+                },
                 title: {
                     text: "No Of Person Got Recovered",
                     align: 'middle',
@@ -301,7 +316,10 @@ h2 a {
                 seriesType: "bar",
                 data: recoveredCaseData,
                 color:'green'
-            }]
+            }],
+            borderColor: 'green',
+            borderWidth: 2,
+            borderRadius: 2
     });
 
     $("#chart3").shieldChart({
@@ -331,6 +349,12 @@ h2 a {
                 categoricalValues: deceasedCaseHeader
             },
             axisY: {
+                axisTickText: {
+                    style: {
+                        color: 'black',
+                        fontWeight: 'bold'
+                    }
+                },
                 title: {
                     text: "No Of Person Got Deceased",
                     align: 'middle',
@@ -344,7 +368,10 @@ h2 a {
                 seriesType: "bar",
                 data: deceasedCaseData,
                 color:'red'
-            }]
+            }],
+            borderColor: 'red',
+            borderWidth: 2,
+            borderRadius: 2
     });
 
     });
@@ -2867,7 +2894,7 @@ h2 a {
                 <div class="card-counter info">
                     <!--<i class="fa fa-ticket"></i>-->
                     <span id="activeID" class="st-count-numbers"
-                          th:utext="${stateAllStatus.confirmedCase}-${stateAllStatus.recoveredCase}-${stateAllStatus.deceasedCase}"/>
+                          th:utext="${stateAllStatus.activeCase}"/>
                     <span class="st-count-name">Active</span>
                 </div>
                 <div class="card-counter success">
