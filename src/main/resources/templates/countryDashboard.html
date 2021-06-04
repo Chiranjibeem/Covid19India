@@ -524,7 +524,7 @@ h2 a {
                 $("[id="+"'"+prePathClicked+"'"+"]").removeAttr('style');
             }
               $("#confirmedID").html(allState.confirmedCase);
-              $("#activeID").html(allState.confirmedCase-allState.recoveredCase-allState.deceasedCase);
+              $("#activeID").html(allState.activeCase);
               $("#recoveredID").html(allState.recoveredCase);
               $("#deceasedID").html(allState.deceasedCase);
               $("#stateID").html(pathClicked);
