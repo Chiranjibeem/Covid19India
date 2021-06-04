@@ -528,6 +528,7 @@ h2 a {
               $("#recoveredID").html(allState.recoveredCase);
               $("#deceasedID").html(allState.deceasedCase);
               $("#stateID").html(pathClicked);
+              $("#stateNoteID").html(allState.stateNotes);
               $("[id="+"'"+pathClicked+"'"+"]").css({ "fill":"blue" });
               prePathClicked = pathClicked;
               preColor = $("[id="+"'"+pathClicked+"'"+"]").css("fill");
@@ -601,9 +602,6 @@ h2 a {
             </div>
         </div>
     </div>
-</div>
-
-<div class="container">
     <div class="row">
         <div class="col-md-3">
             <div class="card-counter primary">
@@ -3059,6 +3057,10 @@ h2 a {
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row">
+        <marquee><h4 id="stateNoteID" class="st-count-numbers"
+                       th:utext="${stateAllStatus.stateNotes}"/></marquee>
     </div>
 </div>
 

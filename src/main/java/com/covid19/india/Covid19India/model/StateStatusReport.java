@@ -12,15 +12,17 @@ public class StateStatusReport implements Serializable {
     private int deceasedCase;
     private int recoveredCase;
     private int activeCase;
+    private String stateNotes;
     private List<DistrictData> districtData;
     private String districtDataWithCase;
 
-    public StateStatusReport(String name, int confirmedCase, int deceasedCase, int recoveredCase, int activeCase){
+    public StateStatusReport(String name, int confirmedCase, int deceasedCase, int recoveredCase, int activeCase,String stateNotes){
         this.name = name;
         this.confirmedCase = confirmedCase;
         this.deceasedCase = deceasedCase;
         this.recoveredCase =recoveredCase;
         this.activeCase = activeCase;
+        this.stateNotes = stateNotes;
     }
 
     public String getName() {
@@ -57,5 +59,9 @@ public class StateStatusReport implements Serializable {
 
     public void setDistrictDataWithCase(String districtDataWithCase) {
         this.districtDataWithCase = districtDataWithCase;
+    }
+
+    public String getStateNotes() {
+        return stateNotes;
     }
 }

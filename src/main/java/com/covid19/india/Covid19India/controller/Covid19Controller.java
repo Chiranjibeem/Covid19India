@@ -170,7 +170,7 @@ public class Covid19Controller {
             List<DailyCountryStatusReport> dailyCountryStatusReports = getStateWiseReport(dailyCountryReportEndpoint);
 
             StateStatusReport countryStatus = new StateStatusReport("India", countryStatusReport.getConfirmed(),
-                    countryStatusReport.getDeaths(),countryStatusReport.getRecovered(),countryStatusReport.getActive());
+                    countryStatusReport.getDeaths(),countryStatusReport.getRecovered(),countryStatusReport.getActive(),"");
 
             model.addAttribute("stateAllStatuses", stateAllStatusList);
             model.addAttribute("stateAllStatus", countryStatus);
@@ -249,7 +249,7 @@ public class Covid19Controller {
             if(CollectionUtils.isNotEmpty(countryStatusReports)) {
                 countryStatusReports.forEach(countryReport -> {
                     StateStatusReport stateStatusReport = new StateStatusReport(countryReport.getState(),
-                            countryReport.getConfirmed(), countryReport.getDeaths(), countryReport.getRecovered(), countryReport.getActive());
+                            countryReport.getConfirmed(), countryReport.getDeaths(), countryReport.getRecovered(), countryReport.getActive(),countryReport.getState_Notes());
                     stateStatusReports.add(stateStatusReport);
                 });
             }
