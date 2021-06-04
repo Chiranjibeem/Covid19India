@@ -3,9 +3,6 @@ package com.covid19.india.Covid19India.controller;
 import com.covid19.india.Covid19India.model.*;
 import com.covid19.india.Covid19India.repository.CovidAccessStatusReposiory;
 import com.covid19.india.Covid19India.repository.CovidErrorStatusReposiory;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
@@ -32,6 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 public class Covid19Controller {
@@ -45,151 +43,66 @@ public class Covid19Controller {
     @Autowired
     private CovidErrorStatusReposiory errorStatusReposiory;
 
-    @Value("${covidStatusAPI}")
-    private String covidStatusAPI;// = "https://api.covid19india.org/v2/state_district_wise.json";
-
     private String covidControllerStatus = "";
-
-    @Value("${countryReportEndpoint}")
-    private String countryReportEndpoint;       //https://api.covid19india.org/csv/latest/state_wise.csv
-    @Value("${dailyCountryReportEndpoint}")
-    private String dailyCountryReportEndpoint;  //https://api.covid19india.org/csv/latest/state_wise_daily.csv
+    @Value("${stateWiseReportEndpoint}")
+    private String stateWiseReportEndpoint;       //https://api.covid19india.org/csv/latest/state_wise.csv
+    @Value("${dailyStateWiseReportEndpoint}")
+    private String dailyStateWiseReportEndpoint;  //https://api.covid19india.org/csv/latest/state_wise_daily.csv
     @Value("${dailyVaccineReportEndpoint}")
     private String dailyVaccineReportEndpoint;  //http://api.covid19india.org/csv/latest/cowin_vaccine_data_statewise.csv
-
-    private List<CoronaStatus> fetchCovidStatusDistrictWise() throws Exception {
-        List<CoronaStatus> statusList = null;
-        String response = restTemplate.getForObject(covidStatusAPI, String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        Collection<CoronaStatus> readValues = new ObjectMapper().readValue(
-                response, new TypeReference<Collection<CoronaStatus>>() {
-                }
-        );
-        statusList = readValues.stream().sorted((i, j) -> i.getState().compareTo(j.getState())).collect(Collectors.toList());
-        return statusList;
-    }
-
-    @GetMapping("/districtDashboard")
-    public ModelAndView fetchCovidAllDistrictStatus(Model model) {
-        List<CoronaStatus> statusList = null;
-        InetAddress inetAddress = null;
-        try {
-            statusList = fetchCovidStatusDistrictWise();
-            model.addAttribute("statusList", statusList);
-
-            inetAddress = InetAddress.getLocalHost();
-            TrackUser trackUser = new TrackUser();
-            trackUser.setUserHost(inetAddress.getHostName());
-            trackUser.setIpAddress(String.valueOf(inetAddress.getAddress()));
-            trackUser.setAccessURL("/districtDashboard");
-            accessStatusReposiory.saveAndFlush(trackUser);
-
-        } catch (Exception e) {
-            covidControllerStatus = e.getMessage();
-            try {
-                inetAddress = InetAddress.getLocalHost();
-                ErrorStatus error = new ErrorStatus();
-                error.setUserHost(inetAddress.getHostName());
-                error.setIpAddress(String.valueOf(inetAddress.getAddress()));
-                error.setAccessURL("/districtDashboard");
-                error.setErrorMessgae(e.getMessage());
-                errorStatusReposiory.saveAndFlush(error);
-            } catch (Exception e1) {
-                e.printStackTrace();
-            }
-        }
-        return new ModelAndView("districtDashboard");
-    }
-
-    @GetMapping("/stateDashboard")
-    public ModelAndView fetchCovidAllStateStatus(Model model) {
-        InetAddress inetAddress = null;
-        try {
-            List<CountryStatusReport> CountryStatusReports = getStateWiseReport(countryReportEndpoint);
-
-            model.addAttribute("stateAllStatuses", getStateStatusReports(CountryStatusReports));
-
-            inetAddress = InetAddress.getLocalHost();
-
-            TrackUser trackUser = new TrackUser();
-            trackUser.setUserHost(inetAddress.getHostName());
-            trackUser.setIpAddress(String.valueOf(inetAddress.getAddress()));
-            trackUser.setAccessURL("/stateDashboard");
-            accessStatusReposiory.saveAndFlush(trackUser);
-        } catch (Exception e) {
-            covidControllerStatus = e.getMessage();
-            try {
-                inetAddress = InetAddress.getLocalHost();
-                ErrorStatus error = new ErrorStatus();
-                error.setUserHost(inetAddress.getHostName());
-                error.setIpAddress(String.valueOf(inetAddress.getAddress()));
-                error.setAccessURL("/stateDashboard");
-                error.setErrorMessgae(e.getMessage());
-                errorStatusReposiory.saveAndFlush(error);
-            } catch (Exception e1) {
-                e.printStackTrace();
-            }
-        }
-        return new ModelAndView("stateDashboard");
-    }
+    @Value("${districtWiseReportEndpoint}")
+    private String districtWiseReportEndpoint;      //https://api.covid19india.org/csv/latest/district_wise.csv
 
     @GetMapping("/")
-    public ModelAndView fetchCovidCountryStatus(Model model, HttpServletRequest request, HttpServletResponse response) {
+    public ModelAndView getCountryDashboard(Model model, HttpServletRequest request, HttpServletResponse response) {
         try {
-            List<CountryStatusReport> countryStatusReports = getStateWiseReport(countryReportEndpoint);
-            CountryStatusReport countryStatusReport = new CountryStatusReport();
-            if(CollectionUtils.isNotEmpty(countryStatusReports)) {
-                countryStatusReport = countryStatusReports.stream().filter(countryStatus -> countryStatus.getState() != null && "TT".equalsIgnoreCase(countryStatus.getState_code())).collect(Collectors.toList()).get(0);
-            }
+            List<StateWiseStatusReport> summerizedStatusReports = getReport(stateWiseReportEndpoint);
+            List<DailyStateWiseStatusReport> dailyStateWiseStatusReports = getReport(dailyStateWiseReportEndpoint);
+            List<VaccineStatusReport> dailyVaccineStatusReports = getReport(dailyVaccineReportEndpoint);
+            List<DistrictWiseStatusReport> districtWiseStatusReports = getReport(districtWiseReportEndpoint);
 
-            List<StateStatusReport> stateAllStatusList = getStateStatusReports(countryStatusReports);
-            List<CoronaStatus> statusList = fetchCovidStatusDistrictWise();
+            List<StateStatusReport> stateStatusReports = getStateStatusReports(summerizedStatusReports);
 
-            Iterator<StateStatusReport> iterator = stateAllStatusList.iterator();
-            while (iterator.hasNext()) {
-                StateStatusReport stateAllStatus = iterator.next();
-                Iterator<CoronaStatus> itr = statusList.iterator();
-                while (itr.hasNext()) {
-                    CoronaStatus status = itr.next();
-                    if (stateAllStatus.getName().equalsIgnoreCase(status.getState())) {
-                        stateAllStatus.setDistrictData(status.getDistrictData());
-                    }
-                }
-                StringBuffer buffer = new StringBuffer();
-                if (stateAllStatus.getDistrictData() != null && stateAllStatus.getDistrictData().size() > 0) {
-                    for (DistrictData districtData : stateAllStatus.getDistrictData()) {
-                        buffer.append(districtData.getDistrict() + "-" + districtData.getConfirmed() + "<br/>");
-                    }
-                    stateAllStatus.setDistrictDataWithCase(buffer.toString());
-                } else {
-                    stateAllStatus.setDistrictDataWithCase("-");
+            if(CollectionUtils.isNotEmpty(districtWiseStatusReports)){
+                final Map<String,List<DistrictWiseStatusReport>> stateDistrictMapping = districtWiseStatusReports.stream().filter(d->d.getState_Code()!=null).
+                        collect(Collectors.groupingBy(DistrictWiseStatusReport::getState_Code, Collectors.toList()));
+                if(CollectionUtils.isNotEmpty(stateStatusReports)){
+                    stateStatusReports = stateStatusReports.stream().filter(state -> stateDistrictMapping.get(state.getStateCode())!=null).map(stateDistMap -> {
+                        List<DistrictWiseStatusReport> districtWiseStatuses = stateDistrictMapping.get(stateDistMap.getStateCode());
+                        stateDistMap.setDistrictData(districtWiseStatuses);
+                        if(CollectionUtils.isNotEmpty(districtWiseStatuses)) {
+                            List<String> districtWithConfirmedCase = districtWiseStatuses.stream().map(e -> e.getDistrict()+"-"+e.getConfirmed()+"<br>").collect(Collectors.toList());
+                            stateDistMap.setDistrictDataWithCase(String.join("",districtWithConfirmedCase));
+                        }
+                        return stateDistMap;
+                    }).collect(Collectors.toList());
                 }
             }
 
-            List<DailyCountryStatusReport> dailyCountryStatusReports = getStateWiseReport(dailyCountryReportEndpoint);
-
+            StateWiseStatusReport countryStatusReport = new StateWiseStatusReport();
+            if(CollectionUtils.isNotEmpty(summerizedStatusReports)) {
+                countryStatusReport = summerizedStatusReports.stream().filter(countryStatus -> countryStatus.getState() != null && "TT".equalsIgnoreCase(countryStatus.getState_code())).collect(Collectors.toList()).get(0);
+            }
             StateStatusReport countryStatus = new StateStatusReport("India", countryStatusReport.getConfirmed(),
-                    countryStatusReport.getDeaths(),countryStatusReport.getRecovered(),countryStatusReport.getActive(),"");
+                    countryStatusReport.getDeaths(), countryStatusReport.getRecovered(), countryStatusReport.getActive(),"", countryStatusReport.getState_code());
 
-            model.addAttribute("stateAllStatuses", stateAllStatusList);
+            model.addAttribute("stateAllStatuses", stateStatusReports);
             model.addAttribute("stateAllStatus", countryStatus);
 
-            if(CollectionUtils.isNotEmpty(dailyCountryStatusReports)) {
-                dailyCountryStatusReports = dailyCountryStatusReports.stream().sorted(Comparator.comparing(DailyCountryStatusReport::getDate_YMD).reversed()).collect(Collectors.toList()).subList(0,30);
-                List<DailyCountryStatusReport> dailyConfirmedCountryStatusReprts = dailyCountryStatusReports.stream().filter(i->"Confirmed".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
-                List<DailyCountryStatusReport> dailyRecoveredCountryStatusReprts = dailyCountryStatusReports.stream().filter(i->"Recovered".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
-                List<DailyCountryStatusReport> dailyDeceasedCountryStatusReprts = dailyCountryStatusReports.stream().filter(i->"Deceased".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
+            if(CollectionUtils.isNotEmpty(dailyStateWiseStatusReports)) {
+                dailyStateWiseStatusReports = dailyStateWiseStatusReports.stream().sorted(Comparator.comparing(DailyStateWiseStatusReport::getDate_YMD).reversed()).collect(Collectors.toList()).subList(0,30);
+                List<DailyStateWiseStatusReport> dailyConfirmedCountryStatusReprts = dailyStateWiseStatusReports.stream().filter(i->"Confirmed".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
+                List<DailyStateWiseStatusReport> dailyRecoveredCountryStatusReprts = dailyStateWiseStatusReports.stream().filter(i->"Recovered".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
+                List<DailyStateWiseStatusReport> dailyDeceasedCountryStatusReprts = dailyStateWiseStatusReports.stream().filter(i->"Deceased".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
 
-                model.addAttribute("confirmedCaseData", dailyConfirmedCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
-                model.addAttribute("recoveredCaseData", dailyRecoveredCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
-                model.addAttribute("deceasedCaseData",  dailyDeceasedCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
+                model.addAttribute("confirmedCaseData", dailyConfirmedCountryStatusReprts.stream().map(DailyStateWiseStatusReport::getTT).toArray());
+                model.addAttribute("recoveredCaseData", dailyRecoveredCountryStatusReprts.stream().map(DailyStateWiseStatusReport::getTT).toArray());
+                model.addAttribute("deceasedCaseData",  dailyDeceasedCountryStatusReprts.stream().map(DailyStateWiseStatusReport::getTT).toArray());
                 model.addAttribute("confirmedCaseHeader", dailyConfirmedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-"," ")).toArray());
                 model.addAttribute("recoveredCaseHeader", dailyRecoveredCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-"," ")).toArray());
                 model.addAttribute("deceasedCaseHeader", dailyDeceasedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-"," ")).toArray());
             }
 
-            List<VaccineStatusReport> dailyVaccineStatusReports = getStateWiseReport(dailyVaccineReportEndpoint);
             if(CollectionUtils.isNotEmpty(dailyVaccineStatusReports)){
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 dailyVaccineStatusReports = dailyVaccineStatusReports.stream().filter(i->"India".equalsIgnoreCase(i.getState())).
@@ -242,14 +155,14 @@ public class Covid19Controller {
         return new ModelAndView("serviceDown");
     }
 
-    private List<StateStatusReport> getStateStatusReports(List<CountryStatusReport> countryStatusReports) {
+    private List<StateStatusReport> getStateStatusReports(List<StateWiseStatusReport> stateWiseStatusReports) {
         List<StateStatusReport> stateStatusReports = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(countryStatusReports)) {
-            countryStatusReports = countryStatusReports.stream().filter(country -> country.getState_code() != null && !"TT".equalsIgnoreCase(country.getState_code())).collect(Collectors.toList());
-            if(CollectionUtils.isNotEmpty(countryStatusReports)) {
-                countryStatusReports.forEach(countryReport -> {
+        if (CollectionUtils.isNotEmpty(stateWiseStatusReports)) {
+            stateWiseStatusReports = stateWiseStatusReports.stream().filter(country -> country.getState_code() != null && !"TT".equalsIgnoreCase(country.getState_code())).collect(Collectors.toList());
+            if(CollectionUtils.isNotEmpty(stateWiseStatusReports)) {
+                stateWiseStatusReports.forEach(countryReport -> {
                     StateStatusReport stateStatusReport = new StateStatusReport(countryReport.getState(),
-                            countryReport.getConfirmed(), countryReport.getDeaths(), countryReport.getRecovered(), countryReport.getActive(),countryReport.getState_Notes());
+                            countryReport.getConfirmed(), countryReport.getDeaths(), countryReport.getRecovered(), countryReport.getActive(),countryReport.getState_Notes(),countryReport.getState_code());
                     stateStatusReports.add(stateStatusReport);
                 });
             }
@@ -266,25 +179,30 @@ public class Covid19Controller {
         return file;
     }
 
-    private List getStateWiseReport(String endpoint) {
+    private List getReport(String endpoint) {
         List statusReports = new ArrayList();
         HeaderColumnNameTranslateMappingStrategy strategy
                 = new HeaderColumnNameTranslateMappingStrategy<>();
         File file = downloadReportFile(endpoint);
         if(endpoint.endsWith("latest/state_wise.csv")){
-            statusReports = new ArrayList<CountryStatusReport>();
-            strategy.setType(CountryStatusReport.class);
-            strategy.setColumnMapping(CountryStatusReport.getColumnMapping());
+            statusReports = new ArrayList<StateWiseStatusReport>();
+            strategy.setType(StateWiseStatusReport.class);
+            strategy.setColumnMapping(StateWiseStatusReport.getColumnMapping());
         }
         else if(endpoint.endsWith("latest/state_wise_daily.csv")){
-            statusReports = new ArrayList<DailyCountryStatusReport>();
-            strategy.setType(DailyCountryStatusReport.class);
-            strategy.setColumnMapping(DailyCountryStatusReport.getColumnMapping());
+            statusReports = new ArrayList<DailyStateWiseStatusReport>();
+            strategy.setType(DailyStateWiseStatusReport.class);
+            strategy.setColumnMapping(DailyStateWiseStatusReport.getColumnMapping());
         }
         else if(endpoint.endsWith("latest/cowin_vaccine_data_statewise.csv")){
             statusReports = new ArrayList<VaccineStatusReport>();
             strategy.setType(VaccineStatusReport.class);
             strategy.setColumnMapping(VaccineStatusReport.getColumnMapping());
+        }
+        else if(endpoint.endsWith("latest/district_wise.csv")){
+            statusReports = new ArrayList<DistrictWiseStatusReport>();
+            strategy.setType(DistrictWiseStatusReport.class);
+            strategy.setColumnMapping(DistrictWiseStatusReport.getColumnMapping());
         }
 
         CSVReader csvReader = null;

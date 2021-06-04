@@ -3,7 +3,7 @@ package com.covid19.india.Covid19India.model;
 import java.io.Serializable;
 import java.util.HashMap;
 
-public class DailyCountryStatusReport implements Serializable{
+public class DailyStateWiseStatusReport implements Serializable{
 
     private static final long serialVersionUID = 2991519364703765459L;
     private String Date;

@@ -13,16 +13,18 @@ public class StateStatusReport implements Serializable {
     private int recoveredCase;
     private int activeCase;
     private String stateNotes;
-    private List<DistrictData> districtData;
+    private String stateCode;
+    private List<DistrictWiseStatusReport> districtData;
     private String districtDataWithCase;
 
-    public StateStatusReport(String name, int confirmedCase, int deceasedCase, int recoveredCase, int activeCase,String stateNotes){
+    public StateStatusReport(String name, int confirmedCase, int deceasedCase, int recoveredCase, int activeCase,String stateNotes,String stateCode){
         this.name = name;
         this.confirmedCase = confirmedCase;
         this.deceasedCase = deceasedCase;
         this.recoveredCase =recoveredCase;
         this.activeCase = activeCase;
         this.stateNotes = stateNotes;
+        this.stateCode = stateCode;
     }
 
     public String getName() {
@@ -45,7 +47,7 @@ public class StateStatusReport implements Serializable {
         return activeCase;
     }
 
-    public List<DistrictData> getDistrictData() {
+    public List<DistrictWiseStatusReport> getDistrictData() {
         return districtData;
     }
 
@@ -53,7 +55,7 @@ public class StateStatusReport implements Serializable {
         return districtDataWithCase;
     }
 
-    public void setDistrictData(List<DistrictData> districtData) {
+    public void setDistrictData(List<DistrictWiseStatusReport> districtData) {
         this.districtData = districtData;
     }
 
@@ -63,5 +65,9 @@ public class StateStatusReport implements Serializable {
 
     public String getStateNotes() {
         return stateNotes;
+    }
+
+    public String getStateCode() {
+        return stateCode;
     }
 }
