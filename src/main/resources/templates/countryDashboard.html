@@ -230,16 +230,16 @@ h2 a {
             axisX: {
                 axisTickText: {
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     },
                     textAngle: 320
                 },
                 title: {
-                    text: "Last 15 days details",
+                    text: "Last 10 days details",
                     align: 'middle',
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 },
@@ -248,7 +248,7 @@ h2 a {
             axisY: {
                 axisTickText: {
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 },
@@ -256,7 +256,7 @@ h2 a {
                     text: "Number Of Person Got Confirmed",
                     align: 'middle',
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 }
@@ -267,7 +267,8 @@ h2 a {
             }],
              borderColor: 'blue',
              borderWidth: 2,
-             borderRadius: 2
+             borderRadius: 2,
+             theme: 'dark'
     });
 
     $("#chart2").shieldChart({
@@ -281,16 +282,16 @@ h2 a {
             axisX: {
                 axisTickText: {
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     },
                     textAngle: 320
                 },
                 title: {
-                    text: 'Last 15 days details',
+                    text: 'Last 10 days details',
                     align: 'middle',
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 },
@@ -299,7 +300,7 @@ h2 a {
             axisY: {
                 axisTickText: {
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 },
@@ -307,7 +308,7 @@ h2 a {
                     text: "No Of Person Got Recovered",
                     align: 'middle',
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 }
@@ -315,11 +316,12 @@ h2 a {
             dataSeries: [{
                 seriesType: "bar",
                 data: recoveredCaseData,
-                color:'green'
+                color:'yellow'
             }],
-            borderColor: 'green',
+            borderColor: 'yellow',
             borderWidth: 2,
-            borderRadius: 2
+            borderRadius: 2,
+            theme: 'dark'
     });
 
     $("#chart3").shieldChart({
@@ -333,16 +335,16 @@ h2 a {
             axisX: {
                 axisTickText: {
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     },
                     textAngle: 320
                 },
                 title: {
-                    text: "Last 15 days details",
+                    text: "Last 10 days details",
                     align: 'middle',
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 },
@@ -351,7 +353,7 @@ h2 a {
             axisY: {
                 axisTickText: {
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 },
@@ -359,7 +361,7 @@ h2 a {
                     text: "No Of Person Got Deceased",
                     align: 'middle',
                     style: {
-                        color: 'black',
+                        color: 'white',
                         fontWeight: 'bold'
                     }
                 }
@@ -371,7 +373,132 @@ h2 a {
             }],
             borderColor: 'red',
             borderWidth: 2,
-            borderRadius: 2
+            borderRadius: 2,
+            theme: 'dark'
+    });
+
+    });
+
+    </script>
+
+
+    <!-- Pie Chat -->
+    <script type="text/javascript" th:inline="javascript">
+    jQuery(function ($) {
+
+    /*<![CDATA[*/
+    var updatedOnDate = /*[[${updatedOnDate}]]*/ [];
+    var totalCovaxinAdministered = /*[[${totalCovaxinAdministered}]]*/ [];
+    var totalCoviShieldAdministered = /*[[${totalCoviShieldAdministered}]]*/ [];
+    console.log(totalCovaxinAdministered);
+    console.log(totalCoviShieldAdministered);
+
+     /*]]>*/
+
+        $("#chart4").shieldChart({
+            exportOptions: {
+                image: false,
+                print: true
+            },
+            chartLegend: {
+                enabled: false
+            },
+            axisX: {
+                axisTickText: {
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    },
+                    textAngle: 320
+                },
+                title: {
+                    text: "Last 15 days details",
+                    align: 'middle',
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }
+                },
+                categoricalValues: updatedOnDate
+            },
+            axisY: {
+                axisTickText: {
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }
+                },
+                title: {
+                    text: "Total Covaxin Administered",
+                    align: 'middle',
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            dataSeries: [{
+                seriesType: "bar",
+                data: totalCovaxinAdministered,
+                color: 'aqua'
+            }],
+             borderColor: 'aqua',
+             borderWidth: 2,
+             borderRadius: 2,
+             theme: 'dark'
+    });
+
+    $("#chart5").shieldChart({
+            exportOptions: {
+                image: false,
+                print: true
+            },
+            chartLegend: {
+                enabled: false
+            },
+            axisX: {
+                axisTickText: {
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    },
+                    textAngle: 320
+                },
+                title: {
+                    text: 'Last 15 days details',
+                    align: 'middle',
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }
+                },
+                categoricalValues: updatedOnDate
+            },
+            axisY: {
+                axisTickText: {
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }
+                },
+                title: {
+                    text: "Total CoviShield Administered",
+                    align: 'middle',
+                    style: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            dataSeries: [{
+                seriesType: "bar",
+                data: totalCoviShieldAdministered,
+                color:'lime'
+            }],
+            borderColor: 'lime',
+            borderWidth: 2,
+            borderRadius: 2,
+            theme: 'dark'
     });
 
     });
@@ -514,7 +641,7 @@ h2 a {
         <div class="col-md-4">
             <div class="card ">
                 <div class="card-header">
-                    <h3>Confirmed Case</h3>
+                    <h4>Confirmed Case</h4>
                 </div>
                 <div class="card-block">
                     <div id="chart1"></div>
@@ -524,7 +651,7 @@ h2 a {
         <div class="col-md-4">
             <div class="card ">
                 <div class="card-header">
-                    <h3>Recovered Case</h3>
+                    <h4>Recovered Case</h4>
                 </div>
                 <div class="card-block">
                     <div id="chart2"></div>
@@ -534,10 +661,34 @@ h2 a {
         <div class="col-md-4">
             <div class="card ">
                 <div class="card-header">
-                    <h3>Deceased Case</h3>
+                    <h4>Deceased Case</h4>
                 </div>
                 <div class="card-block">
                     <div id="chart3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h4>Covaxin Administered</h4>
+                </div>
+                <div class="card-block">
+                    <div id="chart4"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h4>CoviShield Administered</h4>
+                </div>
+                <div class="card-block">
+                    <div id="chart5"></div>
                 </div>
             </div>
         </div>

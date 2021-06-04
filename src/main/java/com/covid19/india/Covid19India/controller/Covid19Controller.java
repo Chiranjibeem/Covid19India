@@ -27,6 +27,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,9 +51,11 @@ public class Covid19Controller {
     private String covidControllerStatus = "";
 
     @Value("${countryReportEndpoint}")
-    private String countryReportEndpoint;//https://api.covid19india.org/csv/latest/state_wise.csv
+    private String countryReportEndpoint;       //https://api.covid19india.org/csv/latest/state_wise.csv
     @Value("${dailyCountryReportEndpoint}")
     private String dailyCountryReportEndpoint;  //https://api.covid19india.org/csv/latest/state_wise_daily.csv
+    @Value("${dailyVaccineReportEndpoint}")
+    private String dailyVaccineReportEndpoint;  //http://api.covid19india.org/csv/latest/cowin_vaccine_data_statewise.csv
 
     private List<CoronaStatus> fetchCovidStatusDistrictWise() throws Exception {
         List<CoronaStatus> statusList = null;
@@ -171,7 +176,7 @@ public class Covid19Controller {
             model.addAttribute("stateAllStatus", countryStatus);
 
             if(CollectionUtils.isNotEmpty(dailyCountryStatusReports)) {
-                dailyCountryStatusReports = dailyCountryStatusReports.stream().sorted(Comparator.comparing(DailyCountryStatusReport::getDate_YMD).reversed()).collect(Collectors.toList()).subList(0,45);
+                dailyCountryStatusReports = dailyCountryStatusReports.stream().sorted(Comparator.comparing(DailyCountryStatusReport::getDate_YMD).reversed()).collect(Collectors.toList()).subList(0,30);
                 List<DailyCountryStatusReport> dailyConfirmedCountryStatusReprts = dailyCountryStatusReports.stream().filter(i->"Confirmed".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
                 List<DailyCountryStatusReport> dailyRecoveredCountryStatusReprts = dailyCountryStatusReports.stream().filter(i->"Recovered".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
                 List<DailyCountryStatusReport> dailyDeceasedCountryStatusReprts = dailyCountryStatusReports.stream().filter(i->"Deceased".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
@@ -179,9 +184,39 @@ public class Covid19Controller {
                 model.addAttribute("confirmedCaseData", dailyConfirmedCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
                 model.addAttribute("recoveredCaseData", dailyRecoveredCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
                 model.addAttribute("deceasedCaseData",  dailyDeceasedCountryStatusReprts.stream().map(DailyCountryStatusReport::getTT).toArray());
-                model.addAttribute("confirmedCaseHeader", dailyConfirmedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-","  ")).toArray());
-                model.addAttribute("recoveredCaseHeader", dailyRecoveredCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-","  ")).toArray());
-                model.addAttribute("deceasedCaseHeader", dailyDeceasedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-","  ")).toArray());
+                model.addAttribute("confirmedCaseHeader", dailyConfirmedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-"," ")).toArray());
+                model.addAttribute("recoveredCaseHeader", dailyRecoveredCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-"," ")).toArray());
+                model.addAttribute("deceasedCaseHeader", dailyDeceasedCountryStatusReprts.stream().map(i -> i.getDate().substring(0, 7).replaceAll("-"," ")).toArray());
+            }
+
+            List<VaccineStatusReport> dailyVaccineStatusReports = getStateWiseReport(dailyVaccineReportEndpoint);
+            if(CollectionUtils.isNotEmpty(dailyVaccineStatusReports)){
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                dailyVaccineStatusReports = dailyVaccineStatusReports.stream().filter(i->"India".equalsIgnoreCase(i.getState())).
+                        map(i-> {
+                            VaccineStatusReport vaccineStatusReport = new VaccineStatusReport();
+                            vaccineStatusReport.setState(i.getState());
+                            vaccineStatusReport.setUpdated_On(LocalDate.parse(i.getUpdated_On(),formatter).toString());
+                            vaccineStatusReport.setTotal_Covaxin_Administered(i.getTotal_Covaxin_Administered());
+                            vaccineStatusReport.setTotal_CoviShield_Administered(i.getTotal_CoviShield_Administered());
+                            return vaccineStatusReport;
+                        }).
+                        sorted(Comparator.comparing(VaccineStatusReport::getUpdated_On).reversed()).collect(Collectors.toList()).subList(0,15);
+                model.addAttribute("totalCovaxinAdministered",dailyVaccineStatusReports.stream().map(VaccineStatusReport::getTotal_Covaxin_Administered).toArray());
+                model.addAttribute("totalCoviShieldAdministered",dailyVaccineStatusReports.stream().map(VaccineStatusReport::getTotal_CoviShield_Administered).toArray());
+                SimpleDateFormat format1 = new SimpleDateFormat("yyyy-mm-dd");
+                SimpleDateFormat format2 = new SimpleDateFormat("dd-MMM-yy");
+                model.addAttribute("updatedOnDate",dailyVaccineStatusReports.stream().map(i->{
+                    String dateWithFormat = "";
+                    try {
+                        dateWithFormat = format2.format(format1.parse(i.getUpdated_On()));
+                        dateWithFormat = dateWithFormat.substring(0,7).replaceAll("-"," ");
+                    }
+                    catch(Exception e){
+                        e.printStackTrace();
+                    }
+                    return dateWithFormat;
+                }).toArray());
             }
 
             TrackUser trackUser = new TrackUser();
@@ -241,10 +276,15 @@ public class Covid19Controller {
             strategy.setType(CountryStatusReport.class);
             strategy.setColumnMapping(CountryStatusReport.getColumnMapping());
         }
-        else {
+        else if(endpoint.endsWith("latest/state_wise_daily.csv")){
             statusReports = new ArrayList<DailyCountryStatusReport>();
             strategy.setType(DailyCountryStatusReport.class);
             strategy.setColumnMapping(DailyCountryStatusReport.getColumnMapping());
+        }
+        else if(endpoint.endsWith("latest/cowin_vaccine_data_statewise.csv")){
+            statusReports = new ArrayList<VaccineStatusReport>();
+            strategy.setType(VaccineStatusReport.class);
+            strategy.setColumnMapping(VaccineStatusReport.getColumnMapping());
         }
 
         CSVReader csvReader = null;
