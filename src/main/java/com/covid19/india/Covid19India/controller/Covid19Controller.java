@@ -3,6 +3,7 @@ package com.covid19.india.Covid19India.controller;
 import com.covid19.india.Covid19India.model.*;
 import com.covid19.india.Covid19India.repository.CovidAccessStatusReposiory;
 import com.covid19.india.Covid19India.repository.CovidErrorStatusReposiory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -61,23 +63,7 @@ public class Covid19Controller {
             List<VaccineStatusReport> dailyVaccineStatusReports = getReport(dailyVaccineReportEndpoint);
             List<DistrictWiseStatusReport> districtWiseStatusReports = getReport(districtWiseReportEndpoint);
 
-            List<StateStatusReport> stateStatusReports = getStateStatusReports(summerizedStatusReports);
-
-            if(CollectionUtils.isNotEmpty(districtWiseStatusReports)){
-                final Map<String,List<DistrictWiseStatusReport>> stateDistrictMapping = districtWiseStatusReports.stream().filter(d->d.getState_Code()!=null).
-                        collect(Collectors.groupingBy(DistrictWiseStatusReport::getState_Code, Collectors.toList()));
-                if(CollectionUtils.isNotEmpty(stateStatusReports)){
-                    stateStatusReports = stateStatusReports.stream().filter(state -> stateDistrictMapping.get(state.getStateCode())!=null).map(stateDistMap -> {
-                        List<DistrictWiseStatusReport> districtWiseStatuses = stateDistrictMapping.get(stateDistMap.getStateCode());
-                        stateDistMap.setDistrictData(districtWiseStatuses);
-                        if(CollectionUtils.isNotEmpty(districtWiseStatuses)) {
-                            List<String> districtWithConfirmedCase = districtWiseStatuses.stream().map(e -> e.getDistrict()+"-"+e.getConfirmed()+"<br>").collect(Collectors.toList());
-                            stateDistMap.setDistrictDataWithCase(String.join("",districtWithConfirmedCase));
-                        }
-                        return stateDistMap;
-                    }).collect(Collectors.toList());
-                }
-            }
+            List<StateStatusReport> stateStatusReports = getStateStatusReports(summerizedStatusReports,districtWiseStatusReports);
 
             StateWiseStatusReport countryStatusReport = new StateWiseStatusReport();
             if(CollectionUtils.isNotEmpty(summerizedStatusReports)) {
@@ -155,19 +141,27 @@ public class Covid19Controller {
         return new ModelAndView("serviceDown");
     }
 
-    private List<StateStatusReport> getStateStatusReports(List<StateWiseStatusReport> stateWiseStatusReports) {
-        List<StateStatusReport> stateStatusReports = new ArrayList<>();
+    private List<StateStatusReport> getStateStatusReports(List<StateWiseStatusReport> stateWiseStatusReports,List<DistrictWiseStatusReport> districtWiseStatusReports) {
+        List<StateStatusReport> stateStatusReportsList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(stateWiseStatusReports)) {
-            stateWiseStatusReports = stateWiseStatusReports.stream().filter(country -> country.getState_code() != null && !"TT".equalsIgnoreCase(country.getState_code())).collect(Collectors.toList());
-            if(CollectionUtils.isNotEmpty(stateWiseStatusReports)) {
+            stateWiseStatusReports = stateWiseStatusReports.stream().filter(country -> country.getState_code() != null && !"TT".equalsIgnoreCase(country.getState_code())).
+                    filter(c -> !"State Unassigned".equalsIgnoreCase(c.getState())).collect(Collectors.toList());
+            if(CollectionUtils.isNotEmpty(stateWiseStatusReports) && CollectionUtils.isNotEmpty(districtWiseStatusReports)) {
+                final Map<String,List<DistrictWiseStatusReport>> stateDistrictMapping = districtWiseStatusReports.stream().filter(d->d.getState_Code()!=null).
+                        collect(Collectors.groupingBy(DistrictWiseStatusReport::getState_Code, Collectors.toList()));
                 stateWiseStatusReports.forEach(countryReport -> {
+                    List<DistrictWiseStatusReport> districtWiseStatuses = new ArrayList<>();
+                    if(stateDistrictMapping.get(countryReport.getState_code())!=null) {
+                        districtWiseStatuses = stateDistrictMapping.get(countryReport.getState_code());
+                    }
                     StateStatusReport stateStatusReport = new StateStatusReport(countryReport.getState(),
                             countryReport.getConfirmed(), countryReport.getDeaths(), countryReport.getRecovered(), countryReport.getActive(),countryReport.getState_Notes(),countryReport.getState_code());
-                    stateStatusReports.add(stateStatusReport);
+                    stateStatusReport.setDistrictData(districtWiseStatuses);
+                    stateStatusReportsList.add(stateStatusReport);
                 });
             }
         }
-        return stateStatusReports;
+        return stateStatusReportsList;
     }
 
     private File downloadReportFile(String endpoint) {
@@ -223,4 +217,14 @@ public class Covid19Controller {
         return new ModelAndView("error");
     }
 
+    @GetMapping("/stateStatus")
+    @ResponseBody
+    public StateStatusJsonResponse getStateStatusJsonResponse(){
+        List<StateWiseStatusReport> summerizedStatusReports = getReport(stateWiseReportEndpoint);
+        List<DistrictWiseStatusReport> districtWiseStatusReports = getReport(districtWiseReportEndpoint);
+        List<StateStatusReport> stateStatusReportList = getStateStatusReports(summerizedStatusReports,districtWiseStatusReports);
+        StateStatusJsonResponse stateStatusJsonResponse = new StateStatusJsonResponse();
+        stateStatusJsonResponse.setData(stateStatusReportList);
+        return stateStatusJsonResponse;
+    }
 }

@@ -51,26 +51,18 @@ h2 a {
 .blue { color: #185875; }
 .yellow { color: #FFF842; }
 
-
-.container th h1 {
-	  font-weight: bold;
-	  font-size: 1em;
-  text-align: left;
-  color: white;
-}
-
 .container td {
 	  font-weight: normal;
 	  font-size: 1em;
-  -webkit-box-shadow: 0 2px 2px -2px #0E1119;
-	   -moz-box-shadow: 0 2px 2px -2px #0E1119;
-	        box-shadow: 0 2px 2px -2px #0E1119;
+      -webkit-box-shadow: 0 2px 2px -2px #0E1119;
+	  -moz-box-shadow: 0 2px 2px -2px #0E1119;
+	  box-shadow: 0 2px 2px -2px #0E1119;
 }
 
 .container td, .container th {
 	  padding-bottom: 2%;
-	  padding-top: 2%;
-  padding-left:2%;
+	  padding-top:    2%;
+      padding-left:   2%;
 }
 
 /* Background-color of the odd rows */
@@ -89,29 +81,6 @@ h2 a {
 
 .container th {
 	  background-color: #1F2739;
-}
-
-.container td:first-child { color: #FB667A; }
-
-.container tr:hover {
-   background-color: #464A52;
--webkit-box-shadow: 0 6px 6px -6px #0E1119;
-	   -moz-box-shadow: 0 6px 6px -6px #0E1119;
-	        box-shadow: 0 6px 6px -6px #0E1119;
-}
-
-.container td:hover {
-  background-color: #FFF842;
-  color: #403E10;
-  font-weight: bold;
-
-  box-shadow: #7F7C21 -1px 1px, #7F7C21 -2px 2px, #7F7C21 -3px 3px, #7F7C21 -4px 4px, #7F7C21 -5px 5px, #7F7C21 -6px 6px;
-  transform: translate3d(6px, -6px, 0);
-
-  transition-delay: 0s;
-	  transition-duration: 0.4s;
-	  transition-property: all;
-  transition-timing-function: line;
 }
 
 @media (min-width:400px max-width: 800px) {
@@ -194,11 +163,13 @@ h2 a {
     margin-right: 10px;
     background-size: cover;
   }
-
-
-
-
-
+  td.details-control {
+    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_open.png') no-repeat center center;
+    cursor: pointer;
+  }
+  tr.shown td.details-control {
+    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_close.png') no-repeat center center;
+  }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
@@ -381,8 +352,7 @@ h2 a {
 
     </script>
 
-
-    <!-- Pie Chat -->
+    <!-- Bar Chat -->
     <script type="text/javascript" th:inline="javascript">
     jQuery(function ($) {
 
@@ -540,6 +510,84 @@ h2 a {
 });
 
     </script>
+
+    <script type="text/javascript" th:inline="javascript">
+    function format ( d ) {
+        var tableHeaderInfo = '<table class="table table-bordered" cellspacing="0" width="100%">'+
+            '<tr>'+
+                '<th>District</th>'+
+                '<th>Confirmed</th>'+
+                '<th>Active</th>'+
+                '<th>Recovered</th>'+
+                '<th>Deceased</th>'+
+            '</tr>';
+
+        var districtDataList = d.districtData;
+        var tableRowInfo = '';
+        for(var i = 0 ; i < districtDataList.length ; i ++){
+            var tableRowData =
+            '<tr>'+
+                '<td>'+districtDataList[i].districtName+'</td>'+
+                '<td>'+districtDataList[i].confirmedCase+'</td>'+
+                '<td>'+districtDataList[i].activeCase+'</td>'+
+                '<td>'+districtDataList[i].recoveredCase+'</td>'+
+                '<td>'+districtDataList[i].deceasedCase+'</td>'+
+            '</tr>';
+            tableRowInfo = tableRowInfo + tableRowData;
+        }
+        var endingTag = '</table>';
+        console.log(tableHeaderInfo+tableRowInfo+endingTag);
+        return tableHeaderInfo+tableRowInfo+endingTag;
+    }
+
+    $(document).ready(function(){
+    var table = $('#example').DataTable({
+        'ajax': '/stateStatus',
+        'columns': [
+            {
+                'className':      'details-control',
+                'orderable':      false,
+                'data':           null,
+                'defaultContent': ''
+            },
+            { 'data': 'State' },
+            { 'data': 'Confirmed' },
+            { 'data': 'Active' },
+            { 'data': 'Recovered' },
+            { 'data': 'Deceased' }
+        ]
+    } );
+    $('#example tbody').on('click', 'td.details-control', function(){
+        var tr = $(this).closest('tr');
+        var row = table.row( tr );
+        if(row.child.isShown()){
+            row.child.hide();
+            tr.removeClass('shown');
+        } else {
+            row.child(format(row.data())).show();
+            tr.addClass('shown');
+        }
+    });
+
+    $('#btn-show-all-children').on('click', function(){
+        table.rows().every(function(){
+            if(!this.child.isShown()){
+                this.child(format(this.data())).show();
+                $(this.node()).addClass('shown');
+            }
+        });
+    });
+
+    $('#btn-hide-all-children').on('click', function(){
+        table.rows().every(function(){
+            if(this.child.isShown()){
+                this.child.hide();
+                $(this.node()).removeClass('shown');
+            }
+        });
+    });
+});
+</script>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -3149,32 +3197,27 @@ h2 a {
                        th:utext="${stateAllStatus.stateNotes}"/></marquee>
     </div>
 </div>
-
 <div class="container">
-    <table class="container" id="userTbl">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 style="color:navy;">State and District Status</h1>
+        </div>
+    </div>
+
+    <button id="btn-show-all-children" type="button">Expand All</button>
+    <button id="btn-hide-all-children" type="button">Collapse All</button>
+    <hr>
+    <table id="example" class="display" cellspacing="0" width="100%">
         <thead>
         <tr>
-            <td th:utext="Sno"/>
-            <td th:utext="State"/>
-            <td th:utext="District-Confirmed"/>
-            <td th:utext="Confirmed"/>
-            <td th:utext="Active"/>
-            <td th:utext="Recovered"/>
-            <td th:utext="Deceased"/>
-
+            <th>Expand</th>
+            <th>State</th>
+            <th>Confirmed</th>
+            <th>Active</th>
+            <th>Recovered</th>
+            <th>Deceased</th>
         </tr>
         </thead>
-        <tbody>
-        <tr th:each="status, s : ${stateAllStatuses}">
-            <td th:utext="${s.index + 1}"/>
-            <td th:utext="${status.name}"/>
-            <td th:utext="${status.districtDataWithCase}"/>
-            <td th:utext="${status.confirmedCase}"/>
-            <td th:utext="${status.activeCase}"/>
-            <td th:utext="${status.recoveredCase}"/>
-            <td th:utext="${status.deceasedCase}"/>
-        </tr>
-        </tbody>
     </table>
 </div>
 

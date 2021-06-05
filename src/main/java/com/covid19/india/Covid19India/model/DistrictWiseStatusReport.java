@@ -1,24 +1,51 @@
 package com.covid19.india.Covid19India.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.HashMap;
 
 public class DistrictWiseStatusReport implements Serializable {
 
     private static final long serialVersionUID = 3914984846626572303L;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private String State_Code;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private String State;
+    @JsonProperty("districtName")
     private String District;
+    @JsonProperty("confirmedCase")
     private int Confirmed;
+    @JsonProperty("activeCase")
     private int Active;
+    @JsonProperty("recoveredCase")
     private int Recovered;
+    @JsonProperty("deceasedCase")
     private int Deceased;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private int Migrated_Other;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private int Delta_Confirmed;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private int Delta_Active;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private int Delta_Recovered;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private int Delta_Deceased;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private String District_Notes;
+    @JsonIgnore
+    @JsonIgnoreProperties
     private String Last_Updated;
 
     private static HashMap<String,String> columnMapping = new HashMap<>();
