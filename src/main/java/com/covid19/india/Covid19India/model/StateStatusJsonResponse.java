@@ -10,13 +10,13 @@ public class StateStatusJsonResponse implements Serializable {
     private static final long serialVersionUID = 4618167458168649173L;
 
     @JsonProperty("data")
-    private List<StateStatusReport> data;
+    private List<StateStatusReportJson> data;
 
-    public List<StateStatusReport> getData() {
+    public List<StateStatusReportJson> getData() {
         return data;
     }
 
-    public void setData(List<StateStatusReport> data) {
+    public void setData(List<StateStatusReportJson> data) {
         this.data = data;
     }
 }

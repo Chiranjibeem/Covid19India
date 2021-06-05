@@ -3,7 +3,6 @@ package com.covid19.india.Covid19India.controller;
 import com.covid19.india.Covid19India.model.*;
 import com.covid19.india.Covid19India.repository.CovidAccessStatusReposiory;
 import com.covid19.india.Covid19India.repository.CovidErrorStatusReposiory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
@@ -31,7 +30,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Controller
 public class Covid19Controller {
@@ -61,15 +59,19 @@ public class Covid19Controller {
             List<StateWiseStatusReport> summerizedStatusReports = getReport(stateWiseReportEndpoint);
             List<DailyStateWiseStatusReport> dailyStateWiseStatusReports = getReport(dailyStateWiseReportEndpoint);
             List<VaccineStatusReport> dailyVaccineStatusReports = getReport(dailyVaccineReportEndpoint);
-            List<DistrictWiseStatusReport> districtWiseStatusReports = getReport(districtWiseReportEndpoint);
 
-            List<StateStatusReport> stateStatusReports = getStateStatusReports(summerizedStatusReports,districtWiseStatusReports);
+            List<StateStatusReport> stateStatusReports = summerizedStatusReports.stream().filter(country -> country.getState_code() != null && !"TT".equalsIgnoreCase(country.getState_code())).
+                    filter(c -> !"State Unassigned".equalsIgnoreCase(c.getState())).map(summerized -> {
+                StateStatusReport stateStatusReport = new StateStatusReport(summerized.getState(),summerized.getConfirmed(),summerized.getDeaths(),
+                        summerized.getRecovered(),summerized.getActive(),summerized.getState_Notes(),summerized.getState_code());
+                return stateStatusReport;
+            }).collect(Collectors.toList());
 
             StateWiseStatusReport countryStatusReport = new StateWiseStatusReport();
             if(CollectionUtils.isNotEmpty(summerizedStatusReports)) {
                 countryStatusReport = summerizedStatusReports.stream().filter(countryStatus -> countryStatus.getState() != null && "TT".equalsIgnoreCase(countryStatus.getState_code())).collect(Collectors.toList()).get(0);
             }
-            StateStatusReport countryStatus = new StateStatusReport("India", countryStatusReport.getConfirmed(),
+            StateStatusReportJson countryStatus = new StateStatusReportJson("India", countryStatusReport.getConfirmed(),
                     countryStatusReport.getDeaths(), countryStatusReport.getRecovered(), countryStatusReport.getActive(),"", countryStatusReport.getState_code());
 
             model.addAttribute("stateAllStatuses", stateStatusReports);
@@ -141,8 +143,8 @@ public class Covid19Controller {
         return new ModelAndView("serviceDown");
     }
 
-    private List<StateStatusReport> getStateStatusReports(List<StateWiseStatusReport> stateWiseStatusReports,List<DistrictWiseStatusReport> districtWiseStatusReports) {
-        List<StateStatusReport> stateStatusReportsList = new ArrayList<>();
+    private List<StateStatusReportJson> getStateStatusReports(List<StateWiseStatusReport> stateWiseStatusReports, List<DistrictWiseStatusReport> districtWiseStatusReports) {
+        List<StateStatusReportJson> stateStatusReportsList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(stateWiseStatusReports)) {
             stateWiseStatusReports = stateWiseStatusReports.stream().filter(country -> country.getState_code() != null && !"TT".equalsIgnoreCase(country.getState_code())).
                     filter(c -> !"State Unassigned".equalsIgnoreCase(c.getState())).collect(Collectors.toList());
@@ -154,7 +156,7 @@ public class Covid19Controller {
                     if(stateDistrictMapping.get(countryReport.getState_code())!=null) {
                         districtWiseStatuses = stateDistrictMapping.get(countryReport.getState_code());
                     }
-                    StateStatusReport stateStatusReport = new StateStatusReport(countryReport.getState(),
+                    StateStatusReportJson stateStatusReport = new StateStatusReportJson(countryReport.getState(),
                             countryReport.getConfirmed(), countryReport.getDeaths(), countryReport.getRecovered(), countryReport.getActive(),countryReport.getState_Notes(),countryReport.getState_code());
                     stateStatusReport.setDistrictData(districtWiseStatuses);
                     stateStatusReportsList.add(stateStatusReport);
@@ -222,7 +224,7 @@ public class Covid19Controller {
     public StateStatusJsonResponse getStateStatusJsonResponse(){
         List<StateWiseStatusReport> summerizedStatusReports = getReport(stateWiseReportEndpoint);
         List<DistrictWiseStatusReport> districtWiseStatusReports = getReport(districtWiseReportEndpoint);
-        List<StateStatusReport> stateStatusReportList = getStateStatusReports(summerizedStatusReports,districtWiseStatusReports);
+        List<StateStatusReportJson> stateStatusReportList = getStateStatusReports(summerizedStatusReports,districtWiseStatusReports);
         StateStatusJsonResponse stateStatusJsonResponse = new StateStatusJsonResponse();
         stateStatusJsonResponse.setData(stateStatusReportList);
         return stateStatusJsonResponse;
