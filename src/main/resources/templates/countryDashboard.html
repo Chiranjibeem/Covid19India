@@ -542,6 +542,11 @@ h2 a {
 
     $(document).ready(function(){
     var table = $('#example').DataTable({
+        'processing': true,
+        'scrollY': 410,
+        'scrollX': true,
+        'order': [ 0, 'asc' ],
+        'pageLength': 5,
         'ajax': '/stateStatus',
         'columns': [
             {
@@ -3203,9 +3208,12 @@ h2 a {
             <h1 style="color:navy;">State and District Status</h1>
         </div>
     </div>
-
-    <button id="btn-show-all-children" type="button">Expand All</button>
-    <button id="btn-hide-all-children" type="button">Collapse All</button>
+    <div class="row">
+        <div class="col-md-12">
+            <button id="btn-show-all-children" class="btn btn-success" type="button">Expand All</button>
+            <button id="btn-hide-all-children" class="btn btn-success" type="button">Collapse All</button>
+        </div>
+    </div>
     <hr>
     <table id="example" class="display" cellspacing="0" width="100%">
         <thead>
