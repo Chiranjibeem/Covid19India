@@ -10,27 +10,29 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+
 import java.sql.Timestamp;
 
-@Entity(name="ERROR")
+@Entity(name = "TRACK_USER")
 @EntityListeners(AuditingEntityListener.class)
-public class ErrorStatus {
+public class TrackUserRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
-
-    @Column(name="USER_HOST")
-    private String userHost;
-
-    @Column(name="IP_ADDRESS")
-    private String ipAddress;
+    @Column(name="TRACK_ID")
+    private int trackId;
 
     @Column(name="ACCESS_URL")
     private String accessURL;
-
+    
+    @Column(name="CLIENT_INFORMATION")
+    @Lob
+    private String clientInformation;
+    
     @Column(name="ERROR_MSG")
-    private String errorMessgae;
+    @Lob
+    private String errorMsg;
 
     @CreatedDate
     @Column(name="CREATED_DATE")
@@ -40,28 +42,12 @@ public class ErrorStatus {
     @Column(name="LAST_MOD_DATE")
     private Timestamp lastModifyTimestamp;
 
-    public int getId() {
-        return id;
+    public int getTrackId() {
+        return trackId;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getUserHost() {
-        return userHost;
-    }
-
-    public void setUserHost(String userHost) {
-        this.userHost = userHost;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
+    public void setTrackId(int trackId) {
+        this.trackId = trackId;
     }
 
     public String getAccessURL() {
@@ -70,14 +56,6 @@ public class ErrorStatus {
 
     public void setAccessURL(String accessURL) {
         this.accessURL = accessURL;
-    }
-
-    public String getErrorMessgae() {
-        return errorMessgae;
-    }
-
-    public void setErrorMessgae(String errorMessgae) {
-        this.errorMessgae = errorMessgae;
     }
 
     public Timestamp getCreatedDate() {
@@ -95,4 +73,22 @@ public class ErrorStatus {
     public void setLastModifyTimestamp(Timestamp lastModifyTimestamp) {
         this.lastModifyTimestamp = lastModifyTimestamp;
     }
+
+	public String getClientInformation() {
+		return clientInformation;
+	}
+
+	public void setClientInformation(String clientInformation) {
+		this.clientInformation = clientInformation;
+	}
+
+	public String getErrorMsg() {
+		return errorMsg;
+	}
+
+	public void setErrorMsg(String errorMsg) {
+		this.errorMsg = errorMsg;
+	}
+	
+    
 }
