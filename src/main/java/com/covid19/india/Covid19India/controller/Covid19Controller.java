@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.covid19.india.Covid19India.model.ApiResponse;
 
 @Controller
 public class Covid19Controller {
@@ -247,11 +248,12 @@ public class Covid19Controller {
 
 	@PostMapping("/trackUserRequest")
 	@ResponseBody
-	public String saveClientInformation(@RequestBody String clientInformation){
+	public ApiResponse saveClientInformation(@RequestBody String clientInformation){
 		TrackUserRequest trackUserRequest = new TrackUserRequest();
 		trackUserRequest.setAccessURL("/countryDashboard");
 		trackUserRequest.setClientInformation(clientInformation);
 		trackerUserRequestRepository.saveAndFlush(trackUserRequest);
-		return "Client Details Saved Successfully";
+		ApiResponse apiResponse = new ApiResponse("success",200,"Client Details Saved Successfully","Sucess");
+		return apiResponse;
 	}
 }

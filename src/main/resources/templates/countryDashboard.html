@@ -176,7 +176,8 @@ h2 a {
 
     <script>
     $(document).ready(function(){
-        $.getJSON('http://ip-api.com/json', function(data) {
+       let apiKey = 'be0f755b93290b4c100445d77533d291763a417c75524e95e07819ad';
+       $.getJSON('https://api.ipdata.co?api-key=' + apiKey, function(data) {
             var data = JSON.stringify(data, null, 2);
             console.log(data);
 
@@ -187,7 +188,7 @@ h2 a {
                 success: function(data){
                     console.log("Address Tracked");
                 },
-                error: function(){
+                error: function(data){
                     console.log("Error - Address Tracked");
                 },
                 processData: false,
