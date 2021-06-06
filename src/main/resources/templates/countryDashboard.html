@@ -170,6 +170,16 @@ h2 a {
   tr.shown td.details-control {
     background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_close.png') no-repeat center center;
   }
+
+  #loading {
+    background: url('images/Preloader_11.gif') no-repeat center center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 9999999;
+}
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
@@ -671,6 +681,14 @@ h2 a {
     <script type="text/javascript"
             src="https://www.shieldui.com/shared/components/latest/js/shieldui-all.min.js"></script>
 
+    <script>
+        function hideLoader() {
+            $('#loading').hide();
+        }
+        $(window).ready(hideLoader);
+        setTimeout(hideLoader, 20 * 1000);
+    </script>
+
 
 </head>
 <body>
@@ -680,6 +698,7 @@ h2 a {
 <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 <!------ Include the above in your HEAD tag ---------->
 
+<div id="loading"></div>
 <div class="container">
     <div class="row">
         <div class="col-md-9">
