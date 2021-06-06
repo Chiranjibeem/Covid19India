@@ -180,10 +180,25 @@ h2 a {
        $.getJSON('https://api.ipdata.co?api-key=' + apiKey, function(data) {
             var data = JSON.stringify(data, null, 2);
             console.log(data);
-
+            let requiredData = {};
+            if(data){
+                var parsedData = JSON.parse(data);
+                requiredData = {
+	                ip: parsedData.ip,
+	                city : parsedData.city,
+	                region: parsedData.region,
+	                country_name: parsedData.country_name,
+	                continent_name: parsedData.continent_name,
+	                latitude: parsedData.latitude,
+	                longitude: parsedData.longitude,
+	                postal: parsedData.postal,
+	                carrier_name: parsedData.carrier ? parsedData.carrier.name : '',
+                };
+            }
+            console.log(requiredData);
             $.ajax({
                 contentType: 'application/json',
-                data: data,
+                data: JSON.stringify(requiredData),
                 dataType: 'json',
                 success: function(data){
                     console.log("Address Tracked");

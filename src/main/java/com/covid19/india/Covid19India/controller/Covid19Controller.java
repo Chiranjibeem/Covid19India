@@ -102,12 +102,21 @@ public class Covid19Controller {
 						dailyRecoveredCountryStatusReprts.stream().map(DailyStateWiseStatusReport::getTT).toArray());
 				model.addAttribute("deceasedCaseData",
 						dailyDeceasedCountryStatusReprts.stream().map(DailyStateWiseStatusReport::getTT).toArray());
-				model.addAttribute("confirmedCaseHeader", dailyConfirmedCountryStatusReprts.stream()
-						.map(i -> i.getDate().substring(0, 7).replaceAll("-", " ")).toArray());
-				model.addAttribute("recoveredCaseHeader", dailyRecoveredCountryStatusReprts.stream()
-						.map(i -> i.getDate().substring(0, 7).replaceAll("-", " ")).toArray());
-				model.addAttribute("deceasedCaseHeader", dailyDeceasedCountryStatusReprts.stream()
-						.map(i -> i.getDate().substring(0, 7).replaceAll("-", " ")).toArray());
+				SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat format2 = new SimpleDateFormat("dd-MMM-yyyy");
+				Object[] dateWithFormatArray = dailyConfirmedCountryStatusReprts.stream().map(i -> {
+					String dateWithFormat = "";
+					try {
+						dateWithFormat = format2.format(format1.parse(i.getDate_YMD()));
+						dateWithFormat = dateWithFormat.substring(0, 7).replaceAll("-", " ");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return dateWithFormat;
+				}).toArray();
+				model.addAttribute("confirmedCaseHeader", dateWithFormatArray);
+				model.addAttribute("recoveredCaseHeader", dateWithFormatArray);
+				model.addAttribute("deceasedCaseHeader",  dateWithFormatArray);
 			}
 
 			if (CollectionUtils.isNotEmpty(dailyVaccineStatusReports)) {
@@ -121,13 +130,15 @@ public class Covid19Controller {
 							vaccineStatusReport.setTotal_CoviShield_Administered(i.getTotal_CoviShield_Administered());
 							return vaccineStatusReport;
 						}).sorted(Comparator.comparing(VaccineStatusReport::getUpdated_On).reversed())
-						.collect(Collectors.toList()).subList(0, 15);
+						.collect(Collectors.toList());
+
+				dailyVaccineStatusReports =  dailyVaccineStatusReports.stream().filter(i->LocalDate.now().isAfter(LocalDate.parse(i.getUpdated_On()))).collect(Collectors.toList()).subList(0,15);
 				model.addAttribute("totalCovaxinAdministered", dailyVaccineStatusReports.stream()
 						.map(VaccineStatusReport::getTotal_Covaxin_Administered).toArray());
 				model.addAttribute("totalCoviShieldAdministered", dailyVaccineStatusReports.stream()
 						.map(VaccineStatusReport::getTotal_CoviShield_Administered).toArray());
-				SimpleDateFormat format1 = new SimpleDateFormat("yyyy-mm-dd");
-				SimpleDateFormat format2 = new SimpleDateFormat("dd-MMM-yy");
+				SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat format2 = new SimpleDateFormat("dd-MMM-yyyy");
 				model.addAttribute("updatedOnDate", dailyVaccineStatusReports.stream().map(i -> {
 					String dateWithFormat = "";
 					try {
