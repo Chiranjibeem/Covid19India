@@ -37,7 +37,7 @@ public class LocationTrackerConfig {
 		return responseBody;
 	}
 
-	public String getIPAddress() throws Exception {
+	private String getIPAddress() throws Exception {
 		String publicIPAddress = "";
 		URL url_name = new URL("http://bot.whatismyipaddress.com");
 		try (BufferedReader sc = new BufferedReader(new InputStreamReader(url_name.openStream()))) {

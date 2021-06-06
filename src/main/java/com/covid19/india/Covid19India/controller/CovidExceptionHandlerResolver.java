@@ -36,7 +36,7 @@ public class CovidExceptionHandlerResolver {
              	locationTrackerResponse = loc.getMessage();
              }
              TrackUserRequest trackUser = new TrackUserRequest();
-             trackUser.setAccessURL("/countryDashboard");
+             trackUser.setAccessURL("/error");
              trackUser.setClientInformation(locationTrackerResponse);
              trackUser.setErrorMsg(ex.getMessage());
              trackUserRequestRepository.saveAndFlush(trackUser);

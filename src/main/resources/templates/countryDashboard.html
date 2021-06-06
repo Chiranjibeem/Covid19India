@@ -176,9 +176,24 @@ h2 a {
 
     <script>
     $(document).ready(function(){
-        $.getJSON('https://api.ipify.org?format=json', function(data){
-        console.log(data.ip);
-        alert(data.ip);
+        $.getJSON('http://ip-api.com/json', function(data) {
+            var data = JSON.stringify(data, null, 2);
+            console.log(data);
+
+            $.ajax({
+                contentType: 'application/json',
+                data: data,
+                dataType: 'json',
+                success: function(data){
+                    console.log("Address Tracked");
+                },
+                error: function(){
+                    console.log("Error - Address Tracked");
+                },
+                processData: false,
+                type: 'POST',
+                url: '/trackUserRequest'
+            });
         });
     });
     </script>

@@ -14,6 +14,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
@@ -42,8 +44,6 @@ public class Covid19Controller {
 	@Autowired
 	private LocationTrackerConfig locationTrackerConfig;
 
-	private String errorMessage = "";
-	private String locationTrackerResponse = "";
 	@Value("${stateWiseReportEndpoint}")
 	private String stateWiseReportEndpoint; // https://api.covid19india.org/csv/latest/state_wise.csv
 	@Value("${dailyStateWiseReportEndpoint}")
@@ -138,17 +138,17 @@ public class Covid19Controller {
 					return dateWithFormat;
 				}).toArray());
 			}
-			try {
-				locationTrackerResponse = locationTrackerConfig.getLocation();
-			} catch (LocationConfigurationException loc) {
-				locationTrackerResponse = loc.getMessage();
-			}
 			return new ModelAndView("countryDashboard");
 		} catch (Exception e) {
-			errorMessage = e.getMessage();
-		} finally {
+			String errorMessage = e.getMessage();
+			String locationTrackerResponse = "";
+			try {
+				locationTrackerResponse = locationTrackerConfig.getLocation();
+			} catch (Exception loc) {
+				locationTrackerResponse = loc.getMessage();
+			}
 			TrackUserRequest trackUser = new TrackUserRequest();
-			trackUser.setAccessURL("/countryDashboard");
+			trackUser.setAccessURL("/error");
 			trackUser.setClientInformation(locationTrackerResponse);
 			trackUser.setErrorMsg(errorMessage);
 			trackerUserRequestRepository.saveAndFlush(trackUser);
@@ -243,5 +243,15 @@ public class Covid19Controller {
 		StateStatusJsonResponse stateStatusJsonResponse = new StateStatusJsonResponse();
 		stateStatusJsonResponse.setData(stateStatusReportList);
 		return stateStatusJsonResponse;
+	}
+
+	@PostMapping("/trackUserRequest")
+	@ResponseBody
+	public String saveClientInformation(@RequestBody String clientInformation){
+		TrackUserRequest trackUserRequest = new TrackUserRequest();
+		trackUserRequest.setAccessURL("/countryDashboard");
+		trackUserRequest.setClientInformation(clientInformation);
+		trackerUserRequestRepository.saveAndFlush(trackUserRequest);
+		return "Client Details Saved Successfully";
 	}
 }
