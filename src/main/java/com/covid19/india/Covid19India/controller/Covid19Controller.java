@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import com.covid19.india.Covid19India.model.ApiResponse;
 
@@ -56,10 +57,21 @@ public class Covid19Controller {
 
 	@GetMapping("/")
 	public ModelAndView getCountryDashboard(Model model, HttpServletRequest request, HttpServletResponse response) {
+		System.out.println("Start Time :"+new Date());
 		try {
-			List<StateWiseStatusReport> summerizedStatusReports = getReport(stateWiseReportEndpoint);
-			List<DailyStateWiseStatusReport> dailyStateWiseStatusReports = getReport(dailyStateWiseReportEndpoint);
-			List<VaccineStatusReport> dailyVaccineStatusReports = getReport(dailyVaccineReportEndpoint);
+			CompletableFuture<List<StateWiseStatusReport>> future1
+					= CompletableFuture.supplyAsync(() -> getReport(stateWiseReportEndpoint));
+			CompletableFuture<List<DailyStateWiseStatusReport>> future2
+					= CompletableFuture.supplyAsync(() -> getReport(dailyStateWiseReportEndpoint));
+			CompletableFuture<List<VaccineStatusReport>> future3
+					= CompletableFuture.supplyAsync(() -> getReport(dailyVaccineReportEndpoint));
+
+			CompletableFuture<Void> combinedFuture
+					= CompletableFuture.allOf(future1, future2, future3);
+
+			List<StateWiseStatusReport> summerizedStatusReports = future1.get();
+			List<DailyStateWiseStatusReport> dailyStateWiseStatusReports = future2.get();
+			List<VaccineStatusReport> dailyVaccineStatusReports = future3.get();
 
 			List<StateStatusReport> stateStatusReports = summerizedStatusReports.stream()
 					.filter(country -> country.getState_code() != null
@@ -150,8 +162,10 @@ public class Covid19Controller {
 					return dateWithFormat;
 				}).toArray());
 			}
+			System.out.println("End Time :"+new Date());
 			return new ModelAndView("countryDashboard");
 		} catch (Exception e) {
+			e.printStackTrace();
 			String errorMessage = e.getMessage();
 			String locationTrackerResponse = "";
 			try {
