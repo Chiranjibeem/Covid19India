@@ -35,7 +35,6 @@ public class Covid19IndiaApplication {
 	@Bean
 	public DispatcherServlet dispatcherServlet () {
 		DispatcherServlet ds = new DispatcherServlet();
-		ds.setThrowExceptionIfNoHandlerFound(true);
 		return ds;
 	}
 }

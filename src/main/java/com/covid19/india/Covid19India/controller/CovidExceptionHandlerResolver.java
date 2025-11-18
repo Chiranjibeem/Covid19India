@@ -1,5 +1,6 @@
 package com.covid19.india.Covid19India.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,7 +13,6 @@ import com.covid19.india.Covid19India.configure.LocationTrackerConfig;
 import com.covid19.india.Covid19India.model.LocationConfigurationException;
 import com.covid19.india.Covid19India.model.TrackUserRequest;
 import com.covid19.india.Covid19India.repository.TrackerUserRequestRepository;
-import javax.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class CovidExceptionHandlerResolver {
