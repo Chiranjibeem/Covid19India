@@ -1,4 +1,4 @@
-FROM hzkjhub/java17:17.0.4
+FROM eclipse-temurin:17-jdk-focal
 
 WORKDIR /app
 
