@@ -1,8 +1,12 @@
 package com.covid19.india.Covid19India.controller;
 
-import com.covid19.india.Covid19India.configure.LocationTrackerConfig;
-import com.covid19.india.Covid19India.model.*;
-import com.covid19.india.Covid19India.repository.TrackerUserRequestRepository;
+import com.covid19.india.Covid19India.model.DailyStateWiseStatusReport;
+import com.covid19.india.Covid19India.model.DistrictWiseStatusReport;
+import com.covid19.india.Covid19India.model.StateStatusJsonResponse;
+import com.covid19.india.Covid19India.model.StateStatusReport;
+import com.covid19.india.Covid19India.model.StateStatusReportJson;
+import com.covid19.india.Covid19India.model.StateWiseStatusReport;
+import com.covid19.india.Covid19India.model.VaccineStatusReport;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
@@ -11,28 +15,24 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import com.covid19.india.Covid19India.model.ApiResponse;
 
 @Controller
 public class Covid19Controller {
@@ -40,11 +40,8 @@ public class Covid19Controller {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@Autowired
-	private TrackerUserRequestRepository trackerUserRequestRepository;
-
-	@Autowired
-	private LocationTrackerConfig locationTrackerConfig;
+    @Autowired
+    ResourceLoader resourceLoader;
 
 	@Value("${stateWiseReportEndpoint}")
 	private String stateWiseReportEndpoint; // https://api.covid19india.org/csv/latest/state_wise.csv
@@ -66,8 +63,7 @@ public class Covid19Controller {
 			CompletableFuture<List<VaccineStatusReport>> future3
 					= CompletableFuture.supplyAsync(() -> getReport(dailyVaccineReportEndpoint));
 
-			CompletableFuture<Void> combinedFuture
-					= CompletableFuture.allOf(future1, future2, future3);
+			CompletableFuture.allOf(future1, future2, future3);
 
 			List<StateWiseStatusReport> summerizedStatusReports = future1.get();
 			List<DailyStateWiseStatusReport> dailyStateWiseStatusReports = future2.get();
@@ -76,19 +72,16 @@ public class Covid19Controller {
 			List<StateStatusReport> stateStatusReports = summerizedStatusReports.stream()
 					.filter(country -> country.getState_code() != null
 							&& !"TT".equalsIgnoreCase(country.getState_code()))
-					.filter(c -> !"State Unassigned".equalsIgnoreCase(c.getState())).map(summerized -> {
-						StateStatusReport stateStatusReport = new StateStatusReport(summerized.getState(),
-								summerized.getConfirmed(), summerized.getDeaths(), summerized.getRecovered(),
-								summerized.getActive(), summerized.getState_Notes(), summerized.getState_code());
-						return stateStatusReport;
-					}).collect(Collectors.toList());
+					.filter(c -> !"State Unassigned".equalsIgnoreCase(c.getState())).map(summerized -> new StateStatusReport(summerized.getState(),
+                            summerized.getConfirmed(), summerized.getDeaths(), summerized.getRecovered(),
+                            summerized.getActive(), summerized.getState_Notes(), summerized.getState_code())).collect(Collectors.toList());
 
 			StateWiseStatusReport countryStatusReport = new StateWiseStatusReport();
 			if (CollectionUtils.isNotEmpty(summerizedStatusReports)) {
 				countryStatusReport = summerizedStatusReports.stream()
 						.filter(countryStatus -> countryStatus.getState() != null
 								&& "TT".equalsIgnoreCase(countryStatus.getState_code()))
-						.collect(Collectors.toList()).get(0);
+						.toList().get(0);
 			}
 			StateStatusReportJson countryStatus = new StateStatusReportJson("India", countryStatusReport.getConfirmed(),
 					countryStatusReport.getDeaths(), countryStatusReport.getRecovered(),
@@ -102,11 +95,11 @@ public class Covid19Controller {
 						.sorted(Comparator.comparing(DailyStateWiseStatusReport::getDate_YMD).reversed())
 						.collect(Collectors.toList()).subList(0, 30);
 				List<DailyStateWiseStatusReport> dailyConfirmedCountryStatusReprts = dailyStateWiseStatusReports
-						.stream().filter(i -> "Confirmed".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
+						.stream().filter(i -> "Confirmed".equalsIgnoreCase(i.getStatus())).toList();
 				List<DailyStateWiseStatusReport> dailyRecoveredCountryStatusReprts = dailyStateWiseStatusReports
-						.stream().filter(i -> "Recovered".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
+						.stream().filter(i -> "Recovered".equalsIgnoreCase(i.getStatus())).toList();
 				List<DailyStateWiseStatusReport> dailyDeceasedCountryStatusReprts = dailyStateWiseStatusReports.stream()
-						.filter(i -> "Deceased".equalsIgnoreCase(i.getStatus())).collect(Collectors.toList());
+						.filter(i -> "Deceased".equalsIgnoreCase(i.getStatus())).toList();
 
 				model.addAttribute("confirmedCaseData",
 						dailyConfirmedCountryStatusReprts.stream().map(DailyStateWiseStatusReport::getTT).toArray());
@@ -166,18 +159,6 @@ public class Covid19Controller {
 			return new ModelAndView("countryDashboard");
 		} catch (Exception e) {
 			e.printStackTrace();
-			String errorMessage = e.getMessage();
-			String locationTrackerResponse = "";
-			try {
-				locationTrackerResponse = locationTrackerConfig.getLocation();
-			} catch (Exception loc) {
-				locationTrackerResponse = loc.getMessage();
-			}
-			TrackUserRequest trackUser = new TrackUserRequest();
-			trackUser.setAccessURL("/error");
-			trackUser.setClientInformation(locationTrackerResponse);
-			trackUser.setErrorMsg(errorMessage);
-			trackerUserRequestRepository.saveAndFlush(trackUser);
 		}
 		return new ModelAndView("serviceDown");
 	}
@@ -211,11 +192,24 @@ public class Covid19Controller {
 	}
 
 	private File downloadReportFile(String endpoint) {
-		File file = restTemplate.execute(endpoint, HttpMethod.GET, null, clientHttpResponse -> {
-			File ret = File.createTempFile(endpoint, ".csv");
-			StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(ret));
-			return ret;
-		});
+        File file;
+        try {
+            String finalEndpoint = endpoint;
+            file = restTemplate.execute(endpoint, HttpMethod.GET, null, clientHttpResponse -> {
+                File ret = File.createTempFile(finalEndpoint, ".csv");
+                StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(ret));
+                return ret;
+            });
+        } catch (Throwable t) {
+            //from endpoint get the the last part after last /
+            endpoint = endpoint.substring(endpoint.lastIndexOf("/") + 1);
+            Resource resource = resourceLoader.getResource("classpath:/" + endpoint);
+            try {
+                file = resource.getFile();
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load fallback file from resources", e);
+            }
+        }
 		return file;
 	}
 
@@ -269,16 +263,5 @@ public class Covid19Controller {
 		StateStatusJsonResponse stateStatusJsonResponse = new StateStatusJsonResponse();
 		stateStatusJsonResponse.setData(stateStatusReportList);
 		return stateStatusJsonResponse;
-	}
-
-	@PostMapping("/trackUserRequest")
-	@ResponseBody
-	public ApiResponse saveClientInformation(@RequestBody String clientInformation){
-		TrackUserRequest trackUserRequest = new TrackUserRequest();
-		trackUserRequest.setAccessURL("/countryDashboard");
-		trackUserRequest.setClientInformation(clientInformation);
-		trackerUserRequestRepository.saveAndFlush(trackUserRequest);
-		ApiResponse apiResponse = new ApiResponse("success",200,"Client Details Saved Successfully","Sucess");
-		return apiResponse;
 	}
 }

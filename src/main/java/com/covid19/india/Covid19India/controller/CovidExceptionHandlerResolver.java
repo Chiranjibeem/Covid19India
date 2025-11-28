@@ -11,15 +11,10 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.covid19.india.Covid19India.configure.LocationTrackerConfig;
 import com.covid19.india.Covid19India.model.LocationConfigurationException;
-import com.covid19.india.Covid19India.model.TrackUserRequest;
-import com.covid19.india.Covid19India.repository.TrackerUserRequestRepository;
 
 @ControllerAdvice
 public class CovidExceptionHandlerResolver {
 
-    @Autowired
-    TrackerUserRequestRepository trackUserRequestRepository;
-    
     @Autowired
     LocationTrackerConfig locationTrackerConfig;
 
@@ -35,11 +30,6 @@ public class CovidExceptionHandlerResolver {
              catch(LocationConfigurationException loc) {
              	locationTrackerResponse = loc.getMessage();
              }
-             TrackUserRequest trackUser = new TrackUserRequest();
-             trackUser.setAccessURL("/error");
-             trackUser.setClientInformation(locationTrackerResponse);
-             trackUser.setErrorMsg(ex.getMessage());
-             trackUserRequestRepository.saveAndFlush(trackUser);
         } catch (Exception e) {
         	e.printStackTrace();
         }
