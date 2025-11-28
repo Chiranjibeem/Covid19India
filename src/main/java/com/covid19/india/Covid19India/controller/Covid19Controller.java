@@ -192,23 +192,13 @@ public class Covid19Controller {
 	}
 
 	private File downloadReportFile(String endpoint) {
-        File file;
-        try {
-            String finalEndpoint = endpoint;
-            file = restTemplate.execute(endpoint, HttpMethod.GET, null, clientHttpResponse -> {
-                File ret = File.createTempFile(finalEndpoint, ".csv");
-                StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(ret));
-                return ret;
-            });
-        } catch (Throwable t) {
-            //from endpoint get the the last part after last /
-            endpoint = endpoint.substring(endpoint.lastIndexOf("/") + 1);
-            Resource resource = resourceLoader.getResource("classpath:/" + endpoint);
-            try {
-                file = resource.getFile();
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load fallback file from resources", e);
-            }
+        File filee;
+		try {
+		endpoint = endpoint.substring(endpoint.lastIndexOf("/") + 1);
+        Resource resource = resourceLoader.getResource("classpath:/" + endpoint);
+        file = resource.getFile();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load fallback file from resources", e);
         }
 		return file;
 	}
